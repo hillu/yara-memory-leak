@@ -7,9 +7,15 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 
 	"yara-memory-leak/go-yara-4.1.0"
 )
+
+/*
+#include <malloc.h>
+*/
+import "C"
 
 var (
 	scanner     Scanner
@@ -27,6 +33,12 @@ func main() {
 	})
 	http.HandleFunc("/i", func(w http.ResponseWriter, r *http.Request) {
 		New(tmpRulePath)
+	})
+	http.HandleFunc("/gc", func(w http.ResponseWriter, r *http.Request) {
+		runtime.GC()
+	})
+	http.HandleFunc("/m", func(w http.ResponseWriter, r *http.Request) {
+		C.malloc_stats()
 	})
 	http.ListenAndServe(":3000", nil)
 }
